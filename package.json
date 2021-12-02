@@ -1,0 +1,24 @@
+{
+  "name": "advent-of-code-2021",
+  "version": "21.2.0",
+  "scripts": {
+    "lint": "eslint \"*.js\"",
+    "lint:fix": "npm run lint -- --fix",
+    "lint:quiet": "npm run lint -- --quiet",
+    "prettier": "prettier \"*.@(js|json|md)\"",
+    "prettier:check": "npm run prettier -- --check",
+    "prettier:write": "npm run prettier -- --write"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/eslint-parser": "^7.16.3",
+    "eslint": "^8.3.0",
+    "eslint-config-opencollective": "^3.0.3",
+    "eslint-plugin-babel": "^5.3.1",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-react": "^7.27.1",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "prettier": "^2.5.0"
+  }
+}
