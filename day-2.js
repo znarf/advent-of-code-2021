@@ -29,22 +29,50 @@ const computeHorizontalPositionAndDepth = (input) => {
         break;
     }
   }
-  return { horizontalPosition, depth };
+  return [horizontalPosition, depth];
+};
+
+const computeHorizontalPositionAndDepthWithAim = (input) => {
+  let horizontalPosition = 0;
+  let depth = 0;
+  let aim = 0;
+  for (const [verb, units] of input) {
+    switch (verb) {
+      case 'forward':
+        horizontalPosition += units;
+        depth += aim * units;
+        break;
+      case 'up':
+        aim -= units;
+        break;
+      case 'down':
+        aim += units;
+        break;
+    }
+  }
+  return [horizontalPosition, depth];
 };
 
 const test = () => {
   const testInput = getInput(testIputFilename);
-  const { horizontalPosition, depth } = computeHorizontalPositionAndDepth(testInput);
+  const [horizontalPosition, depth] = computeHorizontalPositionAndDepth(testInput);
   assert.equal(horizontalPosition, 15);
   assert.equal(depth, 10);
   assert.equal(horizontalPosition * depth, 150);
+  const [horizontalPositionWithAim, depthwithAim] = computeHorizontalPositionAndDepthWithAim(testInput);
+  assert.equal(horizontalPositionWithAim, 15);
+  assert.equal(depthwithAim, 60);
+  assert.equal(horizontalPositionWithAim * depthwithAim, 900);
 };
 
 const run = () => {
-  const testInput = getInput(inputFilename);
-  const { horizontalPosition, depth } = computeHorizontalPositionAndDepth(testInput);
-  console.log(`Horizontal positiomn is ${horizontalPosition} and depth is ${depth}.`);
+  const input = getInput(inputFilename);
+  const [horizontalPosition, depth] = computeHorizontalPositionAndDepth(input);
+  console.log(`A) Horizontal position is ${horizontalPosition} and depth is ${depth}.`);
   console.log(`If you multiply, it's ${horizontalPosition * depth}`);
+  const [horizontalPositionWithAim, depthwithAim] = computeHorizontalPositionAndDepthWithAim(input);
+  console.log(`B) With aim, Horizontal position is ${horizontalPositionWithAim} and depth is ${depthwithAim}.`);
+  console.log(`If you multiply, it's ${horizontalPositionWithAim * depthwithAim}`);
 };
 
 test();
