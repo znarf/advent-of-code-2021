@@ -4,9 +4,6 @@ const fs = require('fs');
 const inputFilename = './day-5.txt';
 const testIputFilename = './day-5-test.txt';
 
-const X_SIZE = 1000;
-const Y_SIZE = 1000;
-
 // function sleep(ms) {
 //   return new Promise((resolve) => setTimeout(resolve, ms));
 // }
@@ -19,19 +16,23 @@ const getInput = (filename) =>
     .map((line) => line.split(' -> '))
     .map((parts) => parts.map((part) => part.split(',').map(Number)));
 
-const createGrid = () =>
-  Array(Y_SIZE)
+const createGrid = (gridSize = 10) =>
+  Array(gridSize)
     .fill(null)
-    .map(() => Array(X_SIZE).fill(0));
+    .map(() => Array(gridSize).fill(0));
 
-const computeGrid = async (grid, input) => {
+const computeGrid = (grid, input) => {
   for (const [[x1, y1], [x2, y2]] of input) {
-    for (let x = x1; x2 > x1 ? x <= x2 : x >= x2; x2 > x1 ? x++ : x--) {
-      for (let y = y1; y2 > y1 ? y <= y2 : y >= y2; y2 > y1 ? y++ : y--) {
-        grid[y][x]++;
-        // await sleep(300);
-        // drawGrid(grid);
-      }
+    const xIterate = x1 === x2 ? 0 : x2 > x1 ? 1 : -1;
+    const yIterate = y1 === y2 ? 0 : y2 > y1 ? 1 : -1;
+    const countIterate = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+    let xPosition = x1;
+    let yPosition = y1;
+    for (let i = 0; i <= countIterate; i++) {
+      grid[yPosition][xPosition]++;
+      // drawGrid(grid);
+      xPosition = xPosition + xIterate;
+      yPosition = yPosition + yIterate;
     }
   }
   return grid;
@@ -55,30 +56,58 @@ const countOverlappingPoints = (grid) => {
   return count;
 };
 
-async function test() {
+const isDiagonal = (entry) => {
+  const [[x1, y1], [x2, y2]] = entry;
+
+  const xDiff = x1 - x2;
+  const yDiff = y1 - y2;
+
+  return Math.abs(xDiff / yDiff) === 1;
+};
+
+const isStraight = (entry) => {
+  const [[x1, y1], [x2, y2]] = entry;
+  return x1 === x2 || y1 === y2;
+};
+
+function test() {
   const input = getInput(testIputFilename);
 
-  // For now, only consider horizontal and vertical lines: lines where either x1 = x2 or y1 = y2.
-  const filteredInput = input.filter(([[x1, y1], [x2, y2]]) => x1 === x2 || y1 === y2);
+  const filteredInput = input.filter(isStraight);
 
-  const grid = createGrid();
-  const computedGrid = await computeGrid(grid, filteredInput);
+  const grid = createGrid(10);
+  const computedGrid = computeGrid(grid, filteredInput);
   const overlappingPointsCount = countOverlappingPoints(computedGrid);
 
-  assert(overlappingPointsCount, 5);
+  assert.equal(overlappingPointsCount, 5);
+
+  const secondFilteredInput = input.filter((entry) => isStraight(entry) || isDiagonal(entry));
+
+  const secondGrid = createGrid(10);
+  const secondComputedGrid = computeGrid(secondGrid, secondFilteredInput);
+  const secondOverlappingPointsCount = countOverlappingPoints(secondComputedGrid);
+
+  assert.equal(secondOverlappingPointsCount, 12);
 }
 
-async function run() {
+function run() {
   const input = getInput(inputFilename);
 
-  // For now, only consider horizontal and vertical lines: lines where either x1 = x2 or y1 = y2.
-  const filteredInput = input.filter(([[x1, y1], [x2, y2]]) => x1 === x2 || y1 === y2);
+  const filteredInput = input.filter(isStraight);
 
-  const grid = createGrid();
-  const computedGrid = await computeGrid(grid, filteredInput);
+  const grid = createGrid(1000);
+  const computedGrid = computeGrid(grid, filteredInput);
   const overlappingPointsCount = countOverlappingPoints(computedGrid);
 
-  console.log(`There ${overlappingPointsCount} is overlapping points.`);
+  console.log(`A) There ${overlappingPointsCount} is overlapping points.`);
+
+  const secondFilteredInput = input.filter((entry) => isStraight(entry) || isDiagonal(entry));
+
+  const secondGrid = createGrid(1000);
+  const secondComputedGrid = computeGrid(secondGrid, secondFilteredInput);
+  const secondOverlappingPointsCount = countOverlappingPoints(secondComputedGrid);
+
+  console.log(`B) There ${secondOverlappingPointsCount} is overlapping points.`);
 }
 
 test();
