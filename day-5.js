@@ -4,10 +4,6 @@ const fs = require('fs');
 const inputFilename = './day-5.txt';
 const testIputFilename = './day-5-test.txt';
 
-// function sleep(ms) {
-//   return new Promise((resolve) => setTimeout(resolve, ms));
-// }
-
 const getInput = (filename) =>
   fs
     .readFileSync(filename, 'utf8')
@@ -56,58 +52,42 @@ const countOverlappingPoints = (grid) => {
   return count;
 };
 
-const isDiagonal = (entry) => {
-  const [[x1, y1], [x2, y2]] = entry;
-
-  const xDiff = x1 - x2;
-  const yDiff = y1 - y2;
-
-  return Math.abs(xDiff / yDiff) === 1;
-};
-
-const isStraight = (entry) => {
-  const [[x1, y1], [x2, y2]] = entry;
-  return x1 === x2 || y1 === y2;
-};
+const isStraight = ([[x1, y1], [x2, y2]]) => x1 === x2 || y1 === y2;
 
 function test() {
+  const gridSize = 10;
+
   const input = getInput(testIputFilename);
 
-  const filteredInput = input.filter(isStraight);
-
-  const grid = createGrid(10);
-  const computedGrid = computeGrid(grid, filteredInput);
+  const grid = createGrid(gridSize);
+  const computedGrid = computeGrid(grid, input.filter(isStraight));
   const overlappingPointsCount = countOverlappingPoints(computedGrid);
 
   assert.equal(overlappingPointsCount, 5);
 
-  const secondFilteredInput = input.filter((entry) => isStraight(entry) || isDiagonal(entry));
-
-  const secondGrid = createGrid(10);
-  const secondComputedGrid = computeGrid(secondGrid, secondFilteredInput);
+  const secondGrid = createGrid(gridSize);
+  const secondComputedGrid = computeGrid(secondGrid, input);
   const secondOverlappingPointsCount = countOverlappingPoints(secondComputedGrid);
 
   assert.equal(secondOverlappingPointsCount, 12);
 }
 
 function run() {
+  const gridSize = 1000;
+
   const input = getInput(inputFilename);
 
-  const filteredInput = input.filter(isStraight);
-
-  const grid = createGrid(1000);
-  const computedGrid = computeGrid(grid, filteredInput);
+  const grid = createGrid(gridSize);
+  const computedGrid = computeGrid(grid, input.filter(isStraight));
   const overlappingPointsCount = countOverlappingPoints(computedGrid);
 
-  console.log(`A) There ${overlappingPointsCount} is overlapping points.`);
+  console.log(`A) There is ${overlappingPointsCount} overlapping points.`);
 
-  const secondFilteredInput = input.filter((entry) => isStraight(entry) || isDiagonal(entry));
-
-  const secondGrid = createGrid(1000);
-  const secondComputedGrid = computeGrid(secondGrid, secondFilteredInput);
+  const secondGrid = createGrid(gridSize);
+  const secondComputedGrid = computeGrid(secondGrid, input);
   const secondOverlappingPointsCount = countOverlappingPoints(secondComputedGrid);
 
-  console.log(`B) There ${secondOverlappingPointsCount} is overlapping points.`);
+  console.log(`B) There is ${secondOverlappingPointsCount} overlapping points.`);
 }
 
 test();
