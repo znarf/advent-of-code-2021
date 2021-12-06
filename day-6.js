@@ -35,8 +35,7 @@ function computeDay(fishs) {
 
 function computeOptimisedDay(fishs) {
   const zeroCount = fishs.shift();
-  fishs.push(0);
-  fishs[6] = fishs[6] + zeroCount;
+  fishs[6] += zeroCount;
   fishs[8] = zeroCount;
   return fishs;
 }
