@@ -4,6 +4,8 @@ const fs = require('fs');
 const inputFilename = './day-7.txt';
 const testIputFilename = './day-7-test.txt';
 
+// const sum = (arr) => arr.reduce((p, c) => p + c, 0);
+
 const getIndexedInput = (filename) => {
   const positions = fs.readFileSync(filename, 'utf8').trim().split(',').map(Number);
 
@@ -15,12 +17,27 @@ const getIndexedInput = (filename) => {
   }, Array(max + 1).fill(0));
 };
 
+const fuelForDistanceIndex = {};
+
 function computeFuelForDistance(distance) {
+  // Cache
+  if (fuelForDistanceIndex[distance] !== undefined) {
+    return fuelForDistanceIndex[distance];
+  }
+
   let fuel = 0;
   for (let i = 0; i < distance; i++) {
     fuel += i + 1;
   }
+
+  fuelForDistanceIndex[distance] = fuel;
+
   return fuel;
+
+  // Alternative algorithm, slower
+  // const steps = Array.from({ length: distance }, (_, i) => i + 1);
+  // fuelForDistanceIndex[distance] = sum(steps);
+  // return fuelForDistanceIndex[distance];
 }
 
 function computeBestPosition(indexedInput, version = 'a') {
