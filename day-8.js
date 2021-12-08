@@ -44,54 +44,24 @@ const sameCharacters = (string, characters) => {
   return characters.length === string.length && characters.split('').filter((c) => !string.includes(c)).length === 0;
 };
 
-const detectors = {
-  1: (digitStrings) => digitStrings.find((digitString) => digitString.length === 2),
-  4: (digitStrings) => digitStrings.find((digitString) => digitString.length === 4),
-  7: (digitStrings) => digitStrings.find((digitString) => digitString.length === 3),
-  8: (digitStrings) => digitStrings.find((digitString) => digitString.length === 7),
-  // Depend on 7 (length 5, contains 7)
-  3: (digitStrings) =>
-    digitStrings.find(
-      (digitString) => digitString.length === 5 && containsCharacters(digitString, detectors[7](digitStrings)),
-    ),
-  // - Depend on 3 (length 6, contains 3)
-  9: (digitStrings) =>
-    digitStrings.find(
-      (digitString) => digitString.length === 6 && containsCharacters(digitString, detectors[3](digitStrings)),
-    ),
-  // - Depend on 9 and 1 (length 6, not 9, not contains 1)
-  6: (digitStrings) =>
-    digitStrings.find(
-      (digitString) =>
-        digitString.length === 6 &&
-        !containsCharacters(digitString, detectors[1](digitStrings)) &&
-        digitString !== detectors[9](digitStrings),
-    ),
-  // - Depend on 9 and 1 (length 6, not 9, contains 1)
-  0: (digitStrings) =>
-    digitStrings.find(
-      (digitString) =>
-        digitString.length === 6 &&
-        containsCharacters(digitString, detectors[1](digitStrings)) &&
-        digitString !== detectors[9](digitStrings),
-    ),
-  // - Depend on 6 (length 5, contained in 6)
-  5: (digitStrings) =>
-    digitStrings.find(
-      (digitString) => digitString.length === 5 && containsCharacters(detectors[6](digitStrings), digitString),
-    ),
-  // Depend on 5 and 3 (length 5, not 5, not 3)
-  2: (digitStrings) =>
-    digitStrings.find(
-      (digitString) =>
-        digitString.length === 5 &&
-        digitString !== detectors[3](digitStrings) &&
-        digitString !== detectors[5](digitStrings),
-    ),
-};
+const detectDigits = (strings) => {
+  const digits = Array(9).fill(null);
 
-const detectDigits = (digitStrings) => {
-  return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((value) => detectors[value](digitStrings));
+  digits[1] = strings.find((s) => s.length === 2);
+  digits[4] = strings.find((s) => s.length === 4);
+  digits[7] = strings.find((s) => s.length === 3);
+  digits[8] = strings.find((s) => s.length === 7);
+
+  digits[3] = strings.find((s) => s.length === 5 && containsCharacters(s, digits[7]));
+
+  digits[9] = strings.find((s) => s.length === 6 && containsCharacters(s, digits[3]));
+  digits[0] = strings.find((s) => s.length === 6 && s !== digits[9] && containsCharacters(s, digits[1]));
+  digits[6] = strings.find((s) => s.length === 6 && s !== digits[9] && s !== digits[0]);
+
+  digits[5] = strings.find((s) => s.length === 5 && containsCharacters(digits[6], s));
+  digits[2] = strings.find((s) => s.length === 5 && s !== digits[3] && s !== digits[5]);
+
+  return digits;
 };
 
 const computeTotal = (input) => {
