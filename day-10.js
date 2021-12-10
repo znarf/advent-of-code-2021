@@ -15,32 +15,38 @@ const charPairs = [
   ['<', '>'],
 ];
 
-const points = {
+const pointsPartOne = {
   ')': 3,
   ']': 57,
   '}': 1197,
   '>': 25137,
 };
 
+const pointsPartTwo = {
+  ')': 1,
+  ']': 2,
+  '}': 3,
+  '>': 4,
+};
+
 const openingChars = charPairs.map((p) => p[0]);
 
 const closingChars = charPairs.map((p) => p[1]);
 
-const getMatchingOpeningChar = (char) => {
-  const pair = charPairs.find(([, closingChar]) => closingChar === char);
+const getMatchingOpeningChar = (char) => charPairs.find(([, closingChar]) => closingChar === char)[0];
 
-  return pair[0];
-};
+const getMatchingClosingChar = (char) => charPairs.find(([openingChar]) => openingChar === char)[1];
+
+const computeScorePartOne = (chars) => sum(chars.map((char) => pointsPartOne[char]));
+
+const computeScorePartTwo = (chars) => chars.reduce((score, char) => score * 5 + pointsPartTwo[char], 0);
 
 function getBreakingCharacters(input) {
   const breakingCharacters = [];
+
   for (const line of input) {
-    // console.log(`Processing ${line}`);
-    let breakingCharacter;
     const stack = [];
-    const chars = line.split('');
-    for (let i = 0; i < chars.length; i++) {
-      const char = chars[i];
+    for (const char of line) {
       if (openingChars.includes(char)) {
         stack.push(char);
       }
@@ -48,26 +54,41 @@ function getBreakingCharacters(input) {
         if (getMatchingOpeningChar(char) === stack[stack.length - 1]) {
           stack.pop();
         } else {
-          if (!breakingCharacter) {
-            // console.log(`-> Nasty char ${char} at position ${i} in line ${line}`);
-            breakingCharacter = char;
-          }
+          breakingCharacters.push(char);
+          break;
         }
       }
-    }
-    if (breakingCharacter) {
-      breakingCharacters.push(breakingCharacter);
-    }
-    if (stack.length > 0) {
-      // console.log(`-> Line is incomplete.`);
     }
   }
 
   return breakingCharacters;
 }
 
-function computeScore(breakingCharacters) {
-  return sum(breakingCharacters.map((char) => points[char]));
+function getIncompleteLines(input) {
+  const incompleteLines = [];
+
+  for (const line of input) {
+    let breakingCharacter;
+    const stack = [];
+    for (const char of line) {
+      if (openingChars.includes(char)) {
+        stack.push(char);
+      }
+      if (closingChars.includes(char)) {
+        if (getMatchingOpeningChar(char) === stack[stack.length - 1]) {
+          stack.pop();
+        } else {
+          breakingCharacter = char;
+          break;
+        }
+      }
+    }
+    if (!breakingCharacter && stack.length > 0) {
+      incompleteLines.push({ line, stack });
+    }
+  }
+
+  return incompleteLines;
 }
 
 function test() {
@@ -75,7 +96,22 @@ function test() {
 
   const breakingCharacters = getBreakingCharacters(input);
 
-  assert.equal(computeScore(breakingCharacters), 26397);
+  assert.equal(computeScorePartOne(breakingCharacters), 26397);
+
+  const incompleteLines = getIncompleteLines(input);
+
+  assert.equal(incompleteLines.length, 5);
+
+  const scores = incompleteLines
+    .map((line) => line.stack.reverse().map((char) => getMatchingClosingChar(char)))
+    .map(computeScorePartTwo)
+    .sort((a, b) => a - b);
+
+  assert.deepEqual(scores, [294, 5566, 288957, 995444, 1480781]);
+
+  const middleIndex = (scores.length - 1) / 2;
+
+  assert.deepEqual(scores[middleIndex], 288957);
 }
 
 function run() {
@@ -83,7 +119,16 @@ function run() {
 
   const breakingCharacters = getBreakingCharacters(input);
 
-  console.log(`Part One) Score is ${computeScore(breakingCharacters)}`);
+  console.log(`Part One) Score is ${computeScorePartOne(breakingCharacters)}`);
+
+  const scores = getIncompleteLines(input)
+    .map((line) => line.stack.reverse().map((char) => getMatchingClosingChar(char)))
+    .map(computeScorePartTwo)
+    .sort((a, b) => a - b);
+
+  const middleIndex = (scores.length - 1) / 2;
+
+  console.log(`Part Two) Score is ${scores[middleIndex]}`);
 }
 
 test();
