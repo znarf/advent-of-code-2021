@@ -48,18 +48,17 @@ function play(input) {
 
   // Increment 1
   for (let y = 0; y < input.length; y++) {
-    const line = input[y];
-    for (let x = 0; x < line.length; x++) {
+    for (let x = 0; x < input[y].length; x++) {
       input[y][x]++;
     }
   }
+
   // Flash over 9
   let hasFlashed;
   do {
     hasFlashed = false;
     for (let y = 0; y < input.length; y++) {
-      const line = input[y];
-      for (let x = 0; x < line.length; x++) {
+      for (let x = 0; x < input[y].length; x++) {
         if (input[y][x] > 9) {
           flash(input, x, y);
           hasFlashed = true;
@@ -78,8 +77,8 @@ function test() {
   const inputPartOne = clone(input);
 
   let countFlashesPartOne = 0;
-  for (let i = 1; i <= 100; i++) {
-    // console.log(`After step ${i}`);
+  for (let step = 1; step <= 100; step++) {
+    // console.log(`After step ${step}`);
     countFlashesPartOne += play(inputPartOne);
     // drawGrid(input);
   }
@@ -88,15 +87,15 @@ function test() {
 
   const inputPartTwo = clone(input);
   let countFlashesPartTwo = 0;
-  let i = 0;
+  let step = 0;
   do {
-    i++;
-    // console.log(`After step ${i}`);
+    step++;
+    // console.log(`After step ${step}`);
     countFlashesPartTwo = play(inputPartTwo);
     // drawGrid(inputPartTwo);
   } while (countFlashesPartTwo !== input.length * input[0].length);
 
-  assert.equal(i, 195);
+  assert.equal(step, 195);
 }
 
 function run() {
@@ -104,7 +103,7 @@ function run() {
 
   const inputPartOne = clone(input);
   let countFlashesPartOne = 0;
-  for (let i = 1; i <= 100; i++) {
+  for (let step = 1; step <= 100; step++) {
     countFlashesPartOne += play(inputPartOne);
   }
 
@@ -112,13 +111,13 @@ function run() {
 
   const inputPartTwo = clone(input);
   let countFlashesPartTwo = 0;
-  let i = 0;
+  let step = 0;
   do {
-    i++;
+    step++;
     countFlashesPartTwo = play(inputPartTwo);
   } while (countFlashesPartTwo !== inputPartTwo.length * inputPartTwo[0].length);
 
-  console.log(`Part Two) Step ${i}`);
+  console.log(`Part Two) Step ${step}`);
 }
 
 test();
