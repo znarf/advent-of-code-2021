@@ -12,13 +12,14 @@ const getInput = (filename) =>
     .map((line) => line.split('').map(Number));
 
 // const drawGrid = (grid) => {
-//   // console.log('\n');
 //   grid.map((line) => console.log(line.join('')));
 //   console.log('\n');
 // };
 
-const getAdjacentPoints = (input, x, y) => {
-  return [
+const clone = (object) => JSON.parse(JSON.stringify(object));
+
+const getAdjacentPoints = (input, x, y) =>
+  [
     { y: y - 1, x }, // north
     { y: y - 1, x: x + 1 }, // north east
     { y, x: x + 1 }, // east
@@ -29,7 +30,6 @@ const getAdjacentPoints = (input, x, y) => {
     { y: y - 1, x: x - 1 }, // north west
   ] // Filter existing
     .filter((point) => input[point.y] && input[point.y][point.x] !== undefined);
-};
 
 function flash(input, x, y) {
   input[y][x] = 0;
@@ -75,25 +75,50 @@ function play(input) {
 function test() {
   const input = getInput(testIputFilename);
 
-  let countFlashes = 0;
+  const inputPartOne = clone(input);
+
+  let countFlashesPartOne = 0;
   for (let i = 1; i <= 100; i++) {
     // console.log(`After step ${i}`);
-    countFlashes += play(input);
+    countFlashesPartOne += play(inputPartOne);
     // drawGrid(input);
   }
 
-  assert.equal(countFlashes, 1656);
+  assert.equal(countFlashesPartOne, 1656);
+
+  const inputPartTwo = clone(input);
+  let countFlashesPartTwo = 0;
+  let i = 0;
+  do {
+    i++;
+    // console.log(`After step ${i}`);
+    countFlashesPartTwo = play(inputPartTwo);
+    // drawGrid(inputPartTwo);
+  } while (countFlashesPartTwo !== input.length * input[0].length);
+
+  assert.equal(i, 195);
 }
 
 function run() {
   const input = getInput(inputFilename);
 
-  let countFlashes = 0;
+  const inputPartOne = clone(input);
+  let countFlashesPartOne = 0;
   for (let i = 1; i <= 100; i++) {
-    countFlashes += play(input);
+    countFlashesPartOne += play(inputPartOne);
   }
 
-  console.log(`Part One) ${countFlashes} flashes.`);
+  console.log(`Part One) ${countFlashesPartOne} flashes.`);
+
+  const inputPartTwo = clone(input);
+  let countFlashesPartTwo = 0;
+  let i = 0;
+  do {
+    i++;
+    countFlashesPartTwo = play(inputPartTwo);
+  } while (countFlashesPartTwo !== inputPartTwo.length * inputPartTwo[0].length);
+
+  console.log(`Part Two) Step ${i}`);
 }
 
 test();
