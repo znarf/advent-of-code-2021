@@ -36,6 +36,14 @@ const computeGrid = (coordinates) => {
   return grid;
 };
 
+const computeFoldedGrid = (grid, foldInstructions) => {
+  let workingGrid = grid;
+  for (const foldInstruction of foldInstructions) {
+    workingGrid = fold(workingGrid, foldInstruction);
+  }
+  return workingGrid;
+};
+
 const fold = (grid, foldInstruction) => {
   const newGrid = clone(grid);
 
@@ -104,6 +112,12 @@ function run() {
   const points = foldedGrid.map((line) => line.filter((el) => el === '#')).flat();
 
   console.log(`Part One) Answer is ${points.length}`);
+
+  const finalGrid = computeFoldedGrid(grid, foldInstructions);
+
+  console.log(`Part Two)`);
+
+  console.log(drawGrid(finalGrid));
 }
 
 test();
