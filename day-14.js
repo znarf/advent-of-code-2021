@@ -4,6 +4,8 @@ const fs = require('fs');
 const inputFilename = './day-14.txt';
 const testInputFilename = './day-14-test.txt';
 
+const clone = (object) => JSON.parse(JSON.stringify(object));
+
 const getInput = (filename) => {
   const [inputPartA, inputPartB] = fs.readFileSync(filename, 'utf8').trim().split('\n\n');
 
@@ -22,27 +24,52 @@ const getRulesIndex = (rules) => {
   return rulesIndex;
 };
 
+const getLinkedListTemplate = (template) => {
+  const list = { first: {} };
+  let current;
+  for (const char of template) {
+    const entry = { value: char };
+    if (!current) {
+      list.first = entry;
+      current = list.first;
+    } else {
+      current.next = entry;
+      current = current.next;
+    }
+  }
+  return list;
+};
+
 function computeTemplate(template, rules, steps = 10) {
   const rulesIndex = getRulesIndex(rules);
 
   // console.log(`Template: ${template}`);
 
   for (let step = 1; step <= steps; step++) {
-    for (let i = 0; i < template.length - 1; i++) {
-      const sequence = template[i] + template[i + 1];
+    // console.log(`Step: ${step}`);
+    let current = template.first;
+    while (current.next) {
+      const sequence = current.value + current.next.value;
+      // console.log(`sequence: ${sequence}`);
       if (rulesIndex[sequence]) {
-        template.splice(i + 1, 0, rulesIndex[sequence]);
-        i++;
+        const entry = { value: rulesIndex[sequence], next: current.next };
+
+        current.next = entry;
+
+        current = current.next;
       }
+      current = current.next;
     }
-    // if (step <= 4) {
-    //   console.log(`After step ${step}: ${template.join('')}`);
-    // } else {
-    //   console.log(`After step ${step}: ${template.length} length`);
-    // }
   }
 
-  return template;
+  const templateArray = [];
+  let current = template.first;
+  while (current) {
+    templateArray.push(current.value);
+    current = current.next;
+  }
+
+  return templateArray;
 }
 
 function computeCounts(template) {
@@ -59,8 +86,14 @@ function computeCounts(template) {
 
 function test() {
   const [template, rules] = getInput(testInputFilename);
+  const linkedListTemplate1 = getLinkedListTemplate(clone(template));
 
-  const computedTemplate = computeTemplate(template, rules, 10);
+  const computedTemplate1 = computeTemplate(linkedListTemplate1, rules, 1);
+  assert.equal(computedTemplate1.join(''), 'NCNBCHB');
+
+  const linkedListTemplate = getLinkedListTemplate(clone(template));
+
+  const computedTemplate = computeTemplate(linkedListTemplate, rules, 10);
 
   const { minCount, maxCount } = computeCounts(computedTemplate);
 
@@ -70,11 +103,19 @@ function test() {
 function run() {
   const [template, rules] = getInput(inputFilename);
 
-  const computedTemplate = computeTemplate(template, rules, 10);
+  const linkedListTemplate = getLinkedListTemplate(clone(template));
+  const computedTemplate = computeTemplate(linkedListTemplate, rules, 10);
 
   const { minCount, maxCount } = computeCounts(computedTemplate);
 
   console.log(`Part One) Answer is ${maxCount - minCount}`);
+
+  const linkedListTemplate2 = getLinkedListTemplate(clone(template));
+  const computedTemplate2 = computeTemplate(linkedListTemplate2, rules, 40);
+
+  const { minCount2, maxCount2 } = computeCounts(computedTemplate2);
+
+  console.log(`Part Two) Answer is ${maxCount2 - minCount2}`);
 }
 
 test();
