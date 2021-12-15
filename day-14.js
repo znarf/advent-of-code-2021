@@ -4,6 +4,10 @@ const fs = require('fs');
 const inputFilename = './day-14.txt';
 const testInputFilename = './day-14-test.txt';
 
+const placeholder = '_';
+
+const clone = (object) => JSON.parse(JSON.stringify(object));
+
 const getInput = (filename) => {
   const [inputPartA, inputPartB] = fs.readFileSync(filename, 'utf8').trim().split('\n\n');
 
@@ -14,42 +18,56 @@ const getInput = (filename) => {
   return [template, rules];
 };
 
-const getRulesIndex = (rules) => {
-  const rulesIndex = {};
-  for (const [pattern, element] of rules) {
-    rulesIndex[pattern] = element;
+const getTemplateIndex = (template) => {
+  const index = {};
+
+  for (let i = 0; i < template.length - 1; i++) {
+    const sequence = template[i] + template[i + 1];
+    if (index[sequence]) {
+      index[sequence]++;
+    } else {
+      index[sequence] = 1;
+    }
   }
-  return rulesIndex;
+
+  index[placeholder + template[0]] = 1;
+  index[template[template.length - 1] + placeholder] = 1;
+
+  return index;
 };
 
-function computeTemplate(template, rules, steps = 10) {
-  const rulesIndex = getRulesIndex(rules);
-
-  // console.log(`Template: ${template}`);
+function compute(template, rules, steps = 10) {
+  const templateIndex = getTemplateIndex(template);
 
   for (let step = 1; step <= steps; step++) {
-    for (let i = 0; i < template.length - 1; i++) {
-      const sequence = template[i] + template[i + 1];
-      if (rulesIndex[sequence]) {
-        template.splice(i + 1, 0, rulesIndex[sequence]);
-        i++;
+    const stepIndex = clone(templateIndex);
+    for (const [sequence, element] of rules) {
+      if (stepIndex[sequence]) {
+        const count = stepIndex[sequence];
+        const leftSequence = sequence[0] + element;
+        const rightSequence = element + sequence[1];
+        templateIndex[sequence] = templateIndex[sequence] ? templateIndex[sequence] - count : -count;
+        templateIndex[leftSequence] = templateIndex[leftSequence] ? templateIndex[leftSequence] + count : count;
+        templateIndex[rightSequence] = templateIndex[rightSequence] ? templateIndex[rightSequence] + count : count;
       }
     }
-    // if (step <= 4) {
-    //   console.log(`After step ${step}: ${template.join('')}`);
-    // } else {
-    //   console.log(`After step ${step}: ${template.length} length`);
-    // }
   }
 
-  return template;
+  return templateIndex;
 }
 
-function computeCounts(template) {
-  const totalCounts = template.reduce((counts, value) => {
-    counts[value] = counts[value] ? counts[value] + 1 : 1;
-    return counts;
-  }, {});
+function computeCounts(result) {
+  let totalCounts = {};
+
+  for (const [pattern, count] of Object.entries(result)) {
+    const [left, right] = pattern.split('');
+    totalCounts[left] = totalCounts[left] ? totalCounts[left] + count : count;
+    totalCounts[right] = totalCounts[right] ? totalCounts[right] + count : count;
+  }
+
+  delete totalCounts[placeholder];
+
+  totalCounts = Object.keys(totalCounts).map((count) => totalCounts[count] / 2);
 
   const minCount = Math.min(...Object.values(totalCounts));
   const maxCount = Math.max(...Object.values(totalCounts));
@@ -60,21 +78,37 @@ function computeCounts(template) {
 function test() {
   const [template, rules] = getInput(testInputFilename);
 
-  const computedTemplate = computeTemplate(template, rules, 10);
+  const result10 = compute(template, rules, 10);
 
-  const { minCount, maxCount } = computeCounts(computedTemplate);
+  const { minCount, maxCount } = computeCounts(result10);
 
   assert.equal(maxCount - minCount, 1588);
+
+  const result40 = compute(template, rules, 40);
+
+  const { minCount: minCount40, maxCount: maxCount40 } = computeCounts(result40);
+
+  assert.equal(maxCount40 - minCount40, 2188189693529);
 }
 
 function run() {
   const [template, rules] = getInput(inputFilename);
 
-  const computedTemplate = computeTemplate(template, rules, 10);
+  const result10 = compute(template, rules, 10);
 
-  const { minCount, maxCount } = computeCounts(computedTemplate);
+  const { minCount, maxCount } = computeCounts(result10);
+
+  assert.equal(maxCount - minCount, 4244);
 
   console.log(`Part One) Answer is ${maxCount - minCount}`);
+
+  const result40 = compute(template, rules, 40);
+
+  const { minCount: minCount40, maxCount: maxCount40 } = computeCounts(result40);
+
+  assert.equal(maxCount40 - minCount40, 4807056953866);
+
+  console.log(`Part Two) Answer is ${maxCount40 - minCount40}`);
 }
 
 test();
